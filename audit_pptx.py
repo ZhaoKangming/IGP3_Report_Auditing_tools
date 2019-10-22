@@ -48,20 +48,27 @@ def get_slide_sort(content_dict: dict) -> dict:
         pass
 
 
-def audit_slide():
-    
-    temp_text: str = only_chinese("")
+def audit_slide(doc):
+    cover_text: str =
+    temp_text: str = only_chinese(cover_text)  # TODO:首页的文本
 
     # 检查汇报人姓名
     del_list: list = ['胰岛素规范临床实践','总结','报告','汇报人']
     for del_str in del_list:
         temp_text = temp_text.replace(del_str,'')
     if len(temp_text):
-        pass
+        real_name: str = reports_info_list[]    #TODO:获取提交报告的医生姓名
+        if real_name not in cover_text:
+            audit_result[1].append('汇报医生与提交报告的医生姓名不一致！')
 
 
 
+def audit_report() -> list:
+    
+    pptx_path: str = r'D:\\1.pptx'
+    get_pptx_content(pptx_path)
+    
 
-pptx_path: str = r'D:\\1.pptx'
-get_pptx_content(pptx_path)
 
+audit_result: list = [['审核结果'], ['修改记录'], ['错误记录']]
+audit_report()
