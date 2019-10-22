@@ -56,7 +56,8 @@ def audit_slide():
     del_list: list = ['胰岛素规范临床实践','总结','报告','汇报人']
     for del_str in del_list:
         temp_text = temp_text.replace(del_str,'')
-    if len(temp_text)
+    if len(temp_text):
+        pass
 
 
 
