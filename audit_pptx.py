@@ -10,10 +10,15 @@ def only_chinese(content):
     return zh_str
 
 
+# 【获取报告的文本内容】-----------------------------------------------------------------------------------
 
-def get_pptx_content(pptx_path: str) -> dict:
+def get_pptx_content(rep_numb: int) -> dict:
+    '''
+    【功能】依据编号获取pptx文件内的文本内容
+    :param rep_numb：报告在reports_info_list中的index值
+    '''
+    pptx_path: str = reports_info_list[i]  # TODO:
     prs = Presentation(pptx_path)
-
     backup_content_dict: dict = {}
     content_dict: dict = {}
     i = 0
@@ -27,7 +32,7 @@ def get_pptx_content(pptx_path: str) -> dict:
             for paragraph in shape.text_frame.paragraphs:
                 for run in paragraph.runs:
                     backup_text += run.text
-                    text += run.text.replace(' ','').replace('_','')
+                    text += run.text.replace(' ', '').replace('_', '')
         content_dict[i] = text
         backup_content_dict[i] = backup_text
         i += 1
@@ -35,36 +40,32 @@ def get_pptx_content(pptx_path: str) -> dict:
     pprint.pprint(content_dict)
     return content_dict
 
+# -----------------------------------------------------------------------------------
 
-def get_slide_sort(content_dict: dict) -> dict:
+def audit_slide():
     slide_sort_dict: dict = {
-        '胰岛素规范临床实践' : [],
-        'Content' : [],
-        'BaseLine' : []
+        '首页': ['胰岛素规范临床实践', []],
+        '注意事项': ['注意事项', []],
+        'BaseLine': []
     }
 
-
-    for k,v in content_dict.items():
-        pass
-
-
-def audit_slide(doc):
-    
-
     # ----------------------- 首页 -----------------------
-    # 检查汇报人姓名
-    ppt_page_numb  # TODO:首页的文本
-    cover_text: str = ''  # TODO:首页的文本
-    temp_text: str = only_chinese(cover_text)
-    del_list: list = ['胰岛素规范临床实践','总结','报告','汇报人']
-    for del_str in del_list:
-        temp_text = temp_text.replace(del_str,'')
-    if len(temp_text):
-        real_name: str = ''  #TODO:获取提交报告的医生姓名
-        if real_name not in cover_text:
-            audit_result[1].append(f'【第{ppt_page_numb}页】汇报医生与提交报告的医生姓名不一致！')
+    if '胰岛素规范临床实践' in content_dict[0]:  # 获取首页页码
+        slide_sort_dict['首页'][1].append(0)
 
-    # ----------------------- 内容目录 -----------------------
+    temp_text: str = only_chinese("胰岛素规范临床实践总结报告汇报人：范晓东")   # TODO:
+
+    # 检查汇报人姓名
+    del_list: list = ['胰岛素规范临床实践', '总结', '报告', '汇报人']
+    for del_str in del_list:
+        temp_text = temp_text.replace(del_str, '')
+    if len(temp_text) > 0:
+        if '医生姓名' not in temp_text:  # TODO:
+            audit_result[2].append('【首页】汇报人姓名与上传报告医生姓名不一致！')
+
+
+
+    # ----------------------- 注意事项 -----------------------
     title_content_text: str = '' # TODO:内容目录的文本
     lack_title_list: list = []
     title_list: list = ['患者情况汇总', '治疗方案', '治疗结果', '典型病例分享', '胰岛素规范实践的获益', '胰岛素规范实践临床展望']
@@ -74,12 +75,13 @@ def audit_slide(doc):
     if 
 
 
-def audit_report() -> list:
-    
-    pptx_path: str = r'D:\\1.pptx'
-    get_pptx_content(pptx_path)
-    
 
-
+# ------------------ 程序主体调用部分 ------------------
 audit_result: list = [['审核结果'], ['修改记录'], ['错误记录']]
-audit_report()
+
+rep_numb: int = 1  # TODO:
+content_dict: dict = get_pptx_content(rep_numb)
+
+audit_slide()
+
+print(audit_result)
