@@ -55,6 +55,19 @@ def get_reports_info(content_text: str) -> list:
                 td_list.append(d.button['value'])
         reports_info_list.append(td_list)
     
+    # 获取医生的报告文件名
+    for file_info_list in reports_info_list:
+        if '.' in file_info_list[4][-8:]:
+            file_extension_name: str = '.' + file_info_list[4][-8:].split('.')[1]
+        else:
+            file_extension_name: str = ''
+        file_name: str = file_info_list[0] + '_' + \
+                        file_info_list[1] + '_' + \
+                        file_info_list[2].replace('报告', 'R') + '_' + \
+                        file_info_list[3].replace('20', '').replace('-', '') + \
+                        file_extension_name
+        file_info_list.append(file_name)
+
     return reports_info_list
 
 
@@ -64,14 +77,10 @@ def download_file(file_info_list: list) -> str:
     :param file_info_list: 报告信息列表
     '''
     ppt_extension_list: list = ['ppt', 'pptx']
-    
+    #TODO:赶紧修改获取文件名的方式
     if '.' in file_info_list[4][-8:]:
         file_extension_name: str = file_info_list[4][-8:].split('.')[1]
-        file_name: str = file_info_list[0] + '_' + \
-                        file_info_list[1] + '_' + \
-                        file_info_list[2].replace('报告', 'R') + '_' + \
-                        file_info_list[3].replace('20', '').replace('-', '') + '.' + \
-                        file_extension_name
+
         backup_path: str = f'../reports/原始报告/{file_name}'
         urllib.request.urlretrieve(file_info_list[4], backup_path)
         if file_extension_name in ppt_extension_list:
@@ -91,6 +100,15 @@ def download_file(file_info_list: list) -> str:
 # 如果没有未审核的报告，怎么说
 
 def get_reports_info_list():
+    '''
+    【功能】获取医生信息列表
+    【返回值样式示例】
+    [['陈兰英', 'Y1402583', '报告1', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028022003-3dc5.pptx', '09928004-39ee-41c5-896f-39c1aef0fe6a','陈兰英_Y1402583_R1_191028.pptx'], 
+    ['陈兰英', 'Y1402583', '报告2', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028043725-53b4.pptx', 'eaec84ae-23b6-401c-9e28-f111fb4f23ca','陈兰英_Y1402583_R2_191028.pptx']]
+    '''
     content_text: str = login_get_urlcontent()
     reports_info_list: str = get_reports_info(content_text)
     return reports_info_list
+
+
+print(get_reports_info_list()[:2])
