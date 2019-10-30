@@ -29,6 +29,7 @@ def login_get_urlcontent() -> str:
     resp = session.post(login_url, data)
 
     url = 'http://ydszn2nd.91huayi.com/pc/Manage/ReportsAudit?txtUserName=&txtDoctorName=&radAuditStatus=1&txtDateBegin=&txtDateEnd=&radReportType='  # 登录后才能访问的网页
+    # 'http://ydszn2nd.91huayi.com/pc/Manage/ReportsAudit?page=2&radAuditStatus=1'
     resp = session.get(url)  # 发送访问请求
     url_content: str = resp.content.decode('utf-8')
 
@@ -77,10 +78,9 @@ def download_file(file_info_list: list) -> str:
     :param file_info_list: 报告信息列表
     '''
     ppt_extension_list: list = ['ppt', 'pptx']
-    #TODO:赶紧修改获取文件名的方式
-    if '.' in file_info_list[4][-8:]:
-        file_extension_name: str = file_info_list[4][-8:].split('.')[1]
-
+    file_name : str = file_info_list[6]
+    if '.' in file_name:
+        file_extension_name: str = file_name.split('.')[1]
         backup_path: str = f'../reports/原始报告/{file_name}'
         urllib.request.urlretrieve(file_info_list[4], backup_path)
         if file_extension_name in ppt_extension_list:
