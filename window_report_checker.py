@@ -113,11 +113,15 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         dst_report_numb_list: list = Main.get_selected_rows(self)
         Main.download_feedback(self, dst_report_numb_list)
+        #TODO:弹窗提醒下载的结果
+
 
     def download_page_report(self):
         '''
         【功能】下载当前页所有的报告文件
         '''
+        #TODO:弹窗提醒下载的结果
+
 
     def download_all_report(self):
         '''
@@ -125,6 +129,9 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         dst_report_numb_list: list = list(range(len(reports_info_list)))
         Main.download_feedback(self, dst_report_numb_list)
+        #TODO:弹窗提醒下载的结果
+
+
 
     def submit_result(self):
         '''
