@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 from ui_report_checker import Ui_MainWindow
 import get_reports
 import read_errorcsv
+import audit_pptx
 import subprocess
 import sys
 import os
@@ -28,20 +29,21 @@ class Main(QMainWindow, Ui_MainWindow):
         self.original_folder_btn.clicked.connect(self.open_original_folder)
         self.passed_folder_btn.clicked.connect(self.open_passed_folder)
         self.open_ppt_btn.clicked.connect(self.open_selected_ppt)
-        self.download_selected_btn.clicked.connect(
-            self.download_selected_report)
+        self.download_selected_btn.clicked.connect(self.download_selected_report)
         self.dwonload_page_btn.clicked.connect(self.download_page_report)
         self.download_all_btn.clicked.connect(self.download_all_report)
+        self.audit_report_btn.clicked.connect(self.audit_report)
         self.submit_result_btn.clicked.connect(self.submit_result)
+
 
     def get_selected_rows(self) -> list:
         selected_rows_list: list = []
         item = self.report_info_table.selectedItems()
         for i in item:
             if self.report_info_table.indexFromItem(i).row() not in selected_rows_list:
-                selected_rows_list.append(
-                    self.report_info_table.indexFromItem(i).row())
+                selected_rows_list.append(self.report_info_table.indexFromItem(i).row())
         return selected_rows_list
+
 
     def load_report_list(self):
         # reports_info_list: list = get_reports.get_reports_info_list()
@@ -60,14 +62,15 @@ class Main(QMainWindow, Ui_MainWindow):
                 self.report_info_table.item(i, j).setTextAlignment(
                     Qt.AlignHCenter | Qt.AlignVCenter)
 
+
     def clear_report_list(self):
         '''
         【功能】清空报告列表
         '''
-        reply = QMessageBox.question(
-            self, 'Message', '确定要清空列表么?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(self, 'Message', '确定要清空列表么?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             self.report_info_table.setRowCount(0)
+
 
     def download_feedback(self, dst_report_numb_list: list):
         '''
@@ -107,6 +110,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 self.report_info_table.cellWidget(
                     report_numb, 5).setCurrentText("     退回")
 
+
     def download_selected_report(self):
         '''
         【功能】下载选中的报告文件
@@ -131,6 +135,39 @@ class Main(QMainWindow, Ui_MainWindow):
         Main.download_feedback(self, dst_report_numb_list)
         #TODO:弹窗提醒下载的结果
 
+
+    def audit_report(self):
+        '''
+        【功能】审核当前选中的报告
+        '''
+        # 检查当前是否有报告选中，以及选择报告的数量
+        stop_audit : bool = False
+        dst_report_numb_list: list = Main.get_selected_rows(self)
+        if len(dst_report_numb_list) == 0 :
+            reply = QMessageBox.warning(self, '警告', '未选择待审核报告的行！', QMessageBox.Yes, QMessageBox.Yes)
+        elif len(dst_report_numb_list) > 1 :
+            reply = QMessageBox.warning(self, '警告', '请只选择一行！', QMessageBox.Yes, QMessageBox.Yes)
+        elif len(dst_report_numb_list) == 1:
+            rep_numb: int = dst_report_numb_list[0]
+            if self.report_info_table.item(rep_numb, 6):
+                if self.report_info_table.item(rep_numb, 6).text().replace(' ', ''):
+                    reply = QMessageBox.question(self, 'Message', '选中的报告的 审核状况/不合格原因 单元格已有内容，确定要重新审核?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                    if reply == QMessageBox.No:
+                        stop_audit = True
+        if stop_audit == False :
+            audit_result: list = [['审核结果'], ['修改记录'], ['错误记录']]
+            pptx_path: str = f'../reports/temp_reports/{reports_info_list[rep_numb][6]}'
+            if os.path.exists(pptx_path):
+                content_dict: dict = audit_pptx.get_pptx_content(pptx_path)
+                audit_pptx.audit_slide()
+
+                #TODO: 展示审核结果
+                #TODO: 打开审核文件
+            else:
+                reply = QMessageBox.warning(self, '警告', '临时报告文件夹中无此文件！请核对！', QMessageBox.Yes, QMessageBox.Yes)
+
+            
+                            
 
 
     def submit_result(self):
@@ -210,17 +247,20 @@ class Main(QMainWindow, Ui_MainWindow):
                         self.report_info_table.item(submit_report_numb, 6).setForeground(QBrush(QColor(6, 82, 121)))  # 靛蓝
                         reply = QMessageBox.warning(self, '警告', f'第{submit_report_numb + 1}行，审核结果设为-退回，却无不合格原因！', QMessageBox.Yes, QMessageBox.Yes)
 
+
     def open_original_folder(self):
         '''
         【功能】打开存储原始报告的文件夹
         '''
         os.system('start explorer ' + '..\\reports\\原始报告\\')
 
+
     def open_passed_folder(self):
         '''
         【功能】打开存储合格报告的文件夹
         '''
         os.system('start explorer ' + '..\\reports\\合格报告\\')
+
 
     def open_selected_ppt(self):
         '''

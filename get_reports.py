@@ -110,5 +110,3 @@ def get_reports_info_list():
     reports_info_list: str = get_reports_info(content_text)
     return reports_info_list
 
-
-print(get_reports_info_list()[:2])
