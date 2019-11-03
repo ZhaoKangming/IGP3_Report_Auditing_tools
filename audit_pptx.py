@@ -1,3 +1,5 @@
+# -*- coding:UTF-8 -*-
+
 from pptx import Presentation
 import re
 import os
@@ -94,7 +96,7 @@ def audit_slide(content_dict : dict, doc_name : str, pptx_path : str) -> dict:
 
     # 生成基线情况汇总字符串
     baseline_page_numbs: int = len(slide_sort_dict['基线情况汇总'])
-    baseline_record : str = ''
+    baseline_record: str = ''
     if baseline_page_numbs == 0 :
         audit_result_dict['错误记录'].append('【基线情况汇总】未发现标题含有-基线情况汇总-的页面！')
     else:
@@ -102,8 +104,10 @@ def audit_slide(content_dict : dict, doc_name : str, pptx_path : str) -> dict:
             baseline_record += content_dict[page_numb]
 
     # 检查基线情况汇总的填写正确与否
-
-
+    baseline_record_no_punctuation: str = re.sub(r'[^\w\s]', '', baseline_record)
+    # result = re.findall(".*纳入(.*)名患者男性(.*)名女性(.*)名平均", s1)
+    # for x in result:
+    #     print(x)
 
         
     # ----------------------- 注意事项 -----------------------

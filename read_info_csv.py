@@ -1,3 +1,5 @@
+# -*- coding:UTF-8 -*-
+
 def get_error_dict(csv_path : str) -> dict:
     '''
     【功能】从csv文件中读取错误码与话术，输出一个字典
