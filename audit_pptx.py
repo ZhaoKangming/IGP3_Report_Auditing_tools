@@ -71,17 +71,20 @@ def audit_slide():
         elif '治疗方案' in content_dict[i] or '病例分享' in content_dict[i]:
             slide_sort_dict['内容目录'].append(i)
 
-
-    title_content_text: str = ''  # TODO:内容目录的文本
-    lack_title_list: list = []
-    title_list: list = ['患者情况汇总', '治疗方案', '治疗结果', '典型病例分享', '胰岛素规范实践的获益', '胰岛素规范实践临床展望']
-    for title_str in title_list:
-        if not title_str in title_content_text:
-            lack_title_list.append(title_str)
-    
-
-
-
+    if slide_sort_dict['内容目录']:
+        content_page_numb: int = slide_sort_dict['内容目录']
+        title_content_text: str = content_dict[content_page_numb]
+        lack_title_list: list = []
+        title_list: list = ['患者情况汇总', '治疗方案', '治疗结果', '典型病例分享', '胰岛素规范实践的获益', '胰岛素规范实践临床展望']
+        for title_str in title_list:
+            if not title_str in title_content_text:
+                lack_title_list.append(title_str)
+        if lack_title_list:
+            lack_title_str: str = '、'.join(lack_title_list)
+            audit_result[2].append(f"【内容目录】缺少以下的模板中的字段：{lack_title_str}！")
+    else:
+        audit_result[2].append('【内容目录】未发现内容目录页！')
+        
     # ----------------------- 注意事项 -----------------------
     if slide_sort_dict['注意事项']:
         # 删除'注意事项'页面
