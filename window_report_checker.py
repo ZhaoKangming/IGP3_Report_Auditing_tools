@@ -78,38 +78,41 @@ class Main(QMainWindow, Ui_MainWindow):
         【功能】尝试下载报告文件，并返回下载情况，并依据不同的下载状况返回不同颜色的下载状况到表格中
         :param  dst_report_numb_list: 报告序号列表
         '''
-        information = QMessageBox.information(
-            self, '温馨提醒', '报告下载中，请耐心等待！', QMessageBox.Yes, QMessageBox.Yes)
-        for report_numb in dst_report_numb_list:
-            download_state: str = get_reports.download_file(
-                reports_info_list[report_numb])
-            self.report_info_table.setItem(
-                report_numb, 4, QTableWidgetItem(download_state))
-            self.report_info_table.item(report_numb, 4).setTextAlignment(
-                Qt.AlignHCenter | Qt.AlignVCenter)
-            if download_state == '已下载':
-                self.report_info_table.item(report_numb, 4).setForeground(
-                    QBrush(QColor(66, 184, 131)))  # 绿色
-            elif download_state == '无后缀名':
-                errorcode: str = 'A2'
-                self.report_info_table.item(report_numb, 4).setForeground(
-                    QBrush(QColor(178, 34, 34)))  # 红色
+        if dst_report_numb_list:
+            for report_numb in dst_report_numb_list:
+                download_state: str = get_reports.download_file(
+                    reports_info_list[report_numb])
                 self.report_info_table.setItem(
-                    report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
-                self.report_info_table.item(report_numb, 6).setTextAlignment(
+                    report_numb, 4, QTableWidgetItem(download_state))
+                self.report_info_table.item(report_numb, 4).setTextAlignment(
                     Qt.AlignHCenter | Qt.AlignVCenter)
-                self.report_info_table.cellWidget(
-                    report_numb, 5).setValue("     退回")
-            elif download_state == '非PPT文件':
-                errorcode: str = 'A1'
-                self.report_info_table.item(report_numb, 4).setForeground(
-                    QBrush(QColor(178, 34, 34)))  # 红色
-                self.report_info_table.setItem(
-                    report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
-                self.report_info_table.item(report_numb, 6).setTextAlignment(
-                    Qt.AlignHCenter | Qt.AlignVCenter)
-                self.report_info_table.cellWidget(
-                    report_numb, 5).setCurrentText("     退回")
+                if download_state == '已下载':
+                    self.report_info_table.item(report_numb, 4).setForeground(
+                        QBrush(QColor(66, 184, 131)))  # 绿色
+                elif download_state == '无后缀名':
+                    errorcode: str = 'A2'
+                    self.report_info_table.item(report_numb, 4).setForeground(
+                        QBrush(QColor(178, 34, 34)))  # 红色
+                    self.report_info_table.setItem(
+                        report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
+                    self.report_info_table.item(report_numb, 6).setTextAlignment(
+                        Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.report_info_table.cellWidget(
+                        report_numb, 5).setValue("     退回")
+                elif download_state == '非PPT文件':
+                    errorcode: str = 'A1'
+                    self.report_info_table.item(report_numb, 4).setForeground(
+                        QBrush(QColor(178, 34, 34)))  # 红色
+                    self.report_info_table.setItem(
+                        report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
+                    self.report_info_table.item(report_numb, 6).setTextAlignment(
+                        Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.report_info_table.cellWidget(
+                        report_numb, 5).setCurrentText("     退回")
+            
+            information = QMessageBox.information(self, '温馨提醒', '报告下载完毕！', QMessageBox.Yes, QMessageBox.Yes)
+        else:
+            information = QMessageBox.warning(self, '警告', '未选择报告所在的行！', QMessageBox.Yes, QMessageBox.Yes)
 
 
     def download_selected_report(self):
@@ -118,14 +121,13 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         dst_report_numb_list: list = Main.get_selected_rows(self)
         Main.download_feedback(self, dst_report_numb_list)
-        #TODO:弹窗提醒下载的结果
 
 
     def download_page_report(self):
         '''
         【功能】下载当前页所有的报告文件
         '''
-        #TODO:弹窗提醒下载的结果
+
 
 
     def download_all_report(self):
@@ -134,7 +136,6 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         dst_report_numb_list: list = list(range(len(reports_info_list)))
         Main.download_feedback(self, dst_report_numb_list)
-        #TODO:弹窗提醒下载的结果
 
 
     def audit_report(self):
@@ -146,8 +147,10 @@ class Main(QMainWindow, Ui_MainWindow):
         dst_report_numb_list: list = Main.get_selected_rows(self)
         if len(dst_report_numb_list) == 0 :
             reply = QMessageBox.warning(self, '警告', '未选择待审核报告的行！', QMessageBox.Yes, QMessageBox.Yes)
+            stop_audit = True
         elif len(dst_report_numb_list) > 1 :
             reply = QMessageBox.warning(self, '警告', '请只选择一行！', QMessageBox.Yes, QMessageBox.Yes)
+            stop_audit = True
         elif len(dst_report_numb_list) == 1:
             rep_numb: int = dst_report_numb_list[0]
             if self.report_info_table.item(rep_numb, 6):
@@ -156,11 +159,11 @@ class Main(QMainWindow, Ui_MainWindow):
                     if reply == QMessageBox.No:
                         stop_audit = True
         if stop_audit == False :
-            audit_result: list = [['审核结果'], ['修改记录'], ['错误记录']]
             pptx_path: str = f'../reports/temp_reports/{reports_info_list[rep_numb][6]}'
+            doc_name: str = reports_info_list[rep_numb][0]
             if os.path.exists(pptx_path):
                 content_dict: dict = audit_pptx.get_pptx_content(pptx_path)
-                audit_pptx.audit_slide()
+                audit_pptx.audit_slide(content_dict, doc_name, pptx_path)
 
                 #TODO: 展示审核结果
                 #TODO: 打开审核文件

@@ -1,6 +1,5 @@
 from pptx import Presentation
 import re
-import pprint
 import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
@@ -40,12 +39,13 @@ def get_pptx_content(pptx_path: str) -> dict:
         backup_content_dict[i] = backup_text
         i += 1
 
-    pprint.pprint(content_dict)
+    # print(content_dict)
     return content_dict
 
 # -----------------------------------------------------------------------------------
 
-def audit_slide():
+def audit_slide(content_dict : dict, doc_name : str, pptx_path : str) -> dict:
+    audit_result_dict: dict = {'审核结果':[], '修改记录':[], '错误记录':[]}
     slide_sort_dict: dict = {'首页': [], '注意事项': [], '内容目录': []}
 
     # ----------------------- 首页 -----------------------
@@ -58,10 +58,10 @@ def audit_slide():
         for del_str in del_list:
             temp_text = temp_text.replace(del_str, '')
         if len(temp_text) > 0:
-            if reports_info_list[rep_numb][0] not in temp_text:
-                audit_result[2].append('【首页】汇报人姓名与上传报告医生姓名不一致！')
+            if doc_name not in temp_text:
+                audit_result_dict['错误记录'].append('【首页】汇报人姓名与上传报告医生姓名不一致！')
     else:
-        audit_result[2].append("【首页】第一页没有'胰岛素规范临床实践'文本！")
+        audit_result_dict['错误记录'].append("【首页】第一页没有'胰岛素规范临床实践'文本！")
 
 
     # ----------------------- 内容目录 -----------------------
@@ -72,7 +72,7 @@ def audit_slide():
             slide_sort_dict['内容目录'].append(i)
 
     if slide_sort_dict['内容目录']:
-        content_page_numb: int = slide_sort_dict['内容目录']
+        content_page_numb: int = slide_sort_dict['内容目录'][0]
         title_content_text: str = content_dict[content_page_numb]
         lack_title_list: list = []
         title_list: list = ['患者情况汇总', '治疗方案', '治疗结果', '典型病例分享', '胰岛素规范实践的获益', '胰岛素规范实践临床展望']
@@ -81,9 +81,9 @@ def audit_slide():
                 lack_title_list.append(title_str)
         if lack_title_list:
             lack_title_str: str = '、'.join(lack_title_list)
-            audit_result[2].append(f"【内容目录】缺少以下的模板中的字段：{lack_title_str}！")
+            audit_result_dict['错误记录'].append(f"【内容目录】缺少以下的模板中的字段：{lack_title_str}！")
     else:
-        audit_result[2].append('【内容目录】未发现内容目录页！')
+        audit_result_dict['错误记录'].append('【内容目录】未发现内容目录页！')
         
     # ----------------------- 注意事项 -----------------------
     if slide_sort_dict['注意事项']:
@@ -95,3 +95,4 @@ def audit_slide():
         del prs.slides._sldIdLst[del_page_numb]
         prs.save(pptx_path)
 
+    return audit_result_dict
