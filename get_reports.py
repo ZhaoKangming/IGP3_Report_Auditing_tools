@@ -95,18 +95,3 @@ def download_file(file_info_list: list) -> str:
 
     return download_state
 
-
-
-# 如果没有未审核的报告，怎么说
-
-def get_reports_info_list():
-    '''
-    【功能】获取医生信息列表
-    【返回值样式示例】
-    [['陈兰英', 'Y1402583', '报告1', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028022003-3dc5.pptx', '09928004-39ee-41c5-896f-39c1aef0fe6a','陈兰英_Y1402583_R1_191028.pptx'], 
-    ['陈兰英', 'Y1402583', '报告2', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028043725-53b4.pptx', 'eaec84ae-23b6-401c-9e28-f111fb4f23ca','陈兰英_Y1402583_R2_191028.pptx']]
-    '''
-    content_text: str = login_get_urlcontent()
-    reports_info_list: str = get_reports_info(content_text)
-    return reports_info_list
-
