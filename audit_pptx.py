@@ -39,7 +39,7 @@ def get_pptx_content(pptx_path: str) -> dict:
         backup_content_dict[i] = backup_text
         i += 1
 
-    # print(content_dict)
+    print(content_dict)
     return content_dict
 
 # -----------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ def audit_slide(content_dict : dict, doc_name : str, pptx_path : str) -> dict:
     if slide_sort_dict['注意事项']:
         # 删除'注意事项'页面
         prs = Presentation(pptx_path)
-        del_page_numb : int = slide_sort_dict['注意事项']
+        del_page_numb : int = slide_sort_dict['注意事项'][0]
         rId = prs.slides._sldIdLst[del_page_numb].rId
         prs.part.drop_rel(rId)
         del prs.slides._sldIdLst[del_page_numb]

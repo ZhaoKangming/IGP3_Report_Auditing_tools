@@ -162,16 +162,16 @@ class Main(QMainWindow, Ui_MainWindow):
             pptx_path: str = f'../reports/temp_reports/{reports_info_list[rep_numb][6]}'
             doc_name: str = reports_info_list[rep_numb][0]
             if os.path.exists(pptx_path):
-                content_dict: dict = audit_pptx.get_pptx_content(pptx_path)
-                audit_pptx.audit_slide(content_dict, doc_name, pptx_path)
+                content_dict : dict = audit_pptx.get_pptx_content(pptx_path)
+                audit_result_dict : dict = audit_pptx.audit_slide(content_dict, doc_name, pptx_path)
+                print(audit_result_dict)
 
                 #TODO: 展示审核结果
                 #TODO: 打开审核文件
             else:
                 reply = QMessageBox.warning(self, '警告', '临时报告文件夹中无此文件！请核对！', QMessageBox.Yes, QMessageBox.Yes)
 
-            
-                            
+
 
 
     def submit_result(self):
