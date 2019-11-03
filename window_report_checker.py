@@ -1,6 +1,6 @@
 #-*- codingg:utf8 -*-
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QCoreApplication
 from PyQt5.QtGui import *
 from ui_report_checker import Ui_MainWindow
 import get_reports
@@ -47,6 +47,7 @@ class Main(QMainWindow, Ui_MainWindow):
 
     def load_report_list(self):
         # reports_info_list: list = get_reports.get_reports_info_list()
+        #TODO: 如果没有未审核的报告，怎么说
         row: int = len(reports_info_list)  # 取得记录个数，用于设置表格的行数
         self.report_info_table.setRowCount(row)
 
@@ -285,13 +286,19 @@ if __name__ == "__main__":
     main.show()
 
     # 公用变量
-    reports_info_list: list = get_reports.get_reports_info_list()
-    '''
-    最终的reports_info_list的内容记录
-    ['姓名','账号','报告序号','上传时间','下载地址','报告ID','文件名','审核日期','审核结果','退回理由']
-    [['陈兰英', 'Y1402583', '报告1', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028022003-3dc5.pptx', '09928004-39ee-41c5-896f-39c1aef0fe6a', '陈兰英_Y1402583_R1_191028.pptx','2019-11-03','通过','--'], 
-    ['陈兰英', 'Y1402583', '报告2', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028043725-53b4.pptx', 'eaec84ae-23b6-401c-9e28-f111fb4f23ca', '陈兰英_Y1402583_R2_191028.pptx''2019-11-03','退回','报告总结部分雷同']]
-    '''
+    content_text: str = get_reports.login_get_urlcontent()
+    try:
+        reports_info_list: list = get_reports.get_reports_info(content_text)
+        '''
+        最终的reports_info_list的内容记录
+        ['姓名','账号','报告序号','上传时间','下载地址','报告ID','文件名','审核日期','审核结果','退回理由']
+        [['陈兰英', 'Y1402583', '报告1', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028022003-3dc5.pptx', '09928004-39ee-41c5-896f-39c1aef0fe6a', '陈兰英_Y1402583_R1_191028.pptx','2019-11-03','通过','--'], 
+        ['陈兰英', 'Y1402583', '报告2', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028043725-53b4.pptx', 'eaec84ae-23b6-401c-9e28-f111fb4f23ca', '陈兰英_Y1402583_R2_191028.pptx''2019-11-03','退回','报告总结部分雷同']]
+        '''
+    except AttributeError:
+        reply = QMessageBox.warning(Main(), '警告', '登陆失败，请检查网络连接！', QMessageBox.Yes, QMessageBox.Yes)
+        main.QCoreApplication.instance().quit
+
     error_dict: dict = read_errorcsv.get_errordict("records\\error_list.csv")
 
     sys.exit(app.exec_())
