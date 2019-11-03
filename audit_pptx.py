@@ -42,11 +42,11 @@ def get_pptx_content(pptx_path: str) -> dict:
     print(content_dict)
     return content_dict
 
-# -----------------------------------------------------------------------------------
+# 【审核报告的内容】-----------------------------------------------------------------------------------
 
 def audit_slide(content_dict : dict, doc_name : str, pptx_path : str) -> dict:
     audit_result_dict: dict = {'审核结果':[], '修改记录':[], '错误记录':[]}
-    slide_sort_dict: dict = {'首页': [], '注意事项': [], '内容目录': []}
+    slide_sort_dict: dict = {'首页': [], '注意事项': [], '内容目录': [], '基线情况汇总':[]}
 
     # ----------------------- 首页 -----------------------
     if '胰岛素规范临床实践' in content_dict[0]:  # 获取首页页码
@@ -84,10 +84,32 @@ def audit_slide(content_dict : dict, doc_name : str, pptx_path : str) -> dict:
             audit_result_dict['错误记录'].append(f"【内容目录】缺少以下的模板中的字段：{lack_title_str}！")
     else:
         audit_result_dict['错误记录'].append('【内容目录】未发现内容目录页！')
+
+
+    # ----------------------- 患者基线情况汇总 -----------------------
+    # 获取患者基线情况目录页码
+    for i in [2,3,4,5]:
+        if '基线情况汇总' in content_dict[i]:  
+            slide_sort_dict['基线情况汇总'].append(i)
+
+    # 生成基线情况汇总字符串
+    baseline_page_numbs: int = len(slide_sort_dict['基线情况汇总'])
+    baseline_record : str = ''
+    if baseline_page_numbs == 0 :
+        audit_result_dict['错误记录'].append('【基线情况汇总】未发现标题含有-基线情况汇总-的页面！')
+    else:
+        for page_numb in slide_sort_dict['基线情况汇总']:
+            baseline_record += content_dict[page_numb]
+
+    # 检查基线情况汇总的填写正确与否
+
+
+
         
     # ----------------------- 注意事项 -----------------------
     if slide_sort_dict['注意事项']:
         # 删除'注意事项'页面
+        audit_result_dict['修改记录'].append("【注意事项】删除了 注意事项 页面！")
         prs = Presentation(pptx_path)
         del_page_numb : int = slide_sort_dict['注意事项'][0]
         rId = prs.slides._sldIdLst[del_page_numb].rId

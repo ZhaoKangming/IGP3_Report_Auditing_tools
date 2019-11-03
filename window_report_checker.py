@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt, QCoreApplication
 from PyQt5.QtGui import *
 from ui_report_checker import Ui_MainWindow
 import get_reports
-import read_errorcsv
+import read_info_csv
 import audit_pptx
 import subprocess
 import sys
@@ -166,6 +166,8 @@ class Main(QMainWindow, Ui_MainWindow):
                 audit_result_dict : dict = audit_pptx.audit_slide(content_dict, doc_name, pptx_path)
                 print(audit_result_dict)
 
+                information = QMessageBox.information(self, '温馨提醒', '报告审核完毕！', QMessageBox.Yes, QMessageBox.Yes)
+
                 #TODO: 展示审核结果
                 #TODO: 打开审核文件
             else:
@@ -302,6 +304,6 @@ if __name__ == "__main__":
         reply = QMessageBox.warning(Main(), '警告', '登陆失败，请检查网络连接！', QMessageBox.Yes, QMessageBox.Yes)
         main.QCoreApplication.instance().quit
 
-    error_dict: dict = read_errorcsv.get_errordict("records\\error_list.csv")
+    error_dict: dict = read_info_csv.get_error_dict("records\\error_list.csv")
 
     sys.exit(app.exec_())
