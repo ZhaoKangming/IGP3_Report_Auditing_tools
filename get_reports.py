@@ -65,7 +65,7 @@ def get_reports_info(content_text: str) -> list:
         file_name: str = file_info_list[0] + '_' + \
                         file_info_list[1] + '_' + \
                         file_info_list[2].replace('报告', 'R') + '_' + \
-                        file_info_list[3].replace('20', '').replace('-', '') + \
+                        file_info_list[3].replace('2019', '19').replace('-', '') + \
                         file_extension_name
         file_info_list.append(file_name)
 

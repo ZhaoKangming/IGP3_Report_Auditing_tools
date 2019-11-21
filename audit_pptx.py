@@ -9,6 +9,9 @@ from PyQt5.QtCore import Qt
 #TODO:增加对ppt格式的支持
 # 通用函数
 def only_chinese(content):
+    '''
+    【功能】将传入的文本仅保留中文
+    '''
     # 处理前进行相关的处理，包括转换成Unicode等
     pattern = re.compile('[^\u4e00-\u9fa50-9]')  # 中文的编码范围是：\u4e00到\u9fa5
     zh_str = "".join(pattern.split(content))
