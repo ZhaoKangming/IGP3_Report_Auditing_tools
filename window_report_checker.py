@@ -17,7 +17,11 @@ import io
 
 #TODO: 一个人一天内多次提交
 #TODO: 重命名提交给诺和的功能
-#TODO: 导出审核记录、
+#TODO: 导出审核记录
+
+# 全局变量的定义及赋值
+workspace_path: str = os.path.dirname(os.path.realpath(__file__))
+
 
 class Main(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -61,8 +65,7 @@ class Main(QMainWindow, Ui_MainWindow):
                 temp_data = reports_info_list[i][j]  # 临时记录，不能直接插入表格
                 data = QTableWidgetItem(str(temp_data))  # 转换后可插入表格
                 self.report_info_table.setItem(i, j, data)
-                self.report_info_table.item(i, j).setTextAlignment(
-                    Qt.AlignHCenter | Qt.AlignVCenter)
+                self.report_info_table.item(i, j).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
 
     def clear_report_list(self):
@@ -92,24 +95,16 @@ class Main(QMainWindow, Ui_MainWindow):
                         QBrush(QColor(66, 184, 131)))  # 绿色
                 elif download_state == '无后缀名':
                     errorcode: str = 'A2'
-                    self.report_info_table.item(report_numb, 4).setForeground(
-                        QBrush(QColor(178, 34, 34)))  # 红色
-                    self.report_info_table.setItem(
-                        report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
-                    self.report_info_table.item(report_numb, 6).setTextAlignment(
-                        Qt.AlignHCenter | Qt.AlignVCenter)
-                    self.report_info_table.cellWidget(
-                        report_numb, 5).setValue("     退回")
+                    self.report_info_table.item(report_numb, 4).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
+                    self.report_info_table.setItem(report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
+                    self.report_info_table.item(report_numb, 6).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.report_info_table.cellWidget(report_numb, 5).setValue("     退回")
                 elif download_state == '非PPT文件':
                     errorcode: str = 'A1'
-                    self.report_info_table.item(report_numb, 4).setForeground(
-                        QBrush(QColor(178, 34, 34)))  # 红色
-                    self.report_info_table.setItem(
-                        report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
-                    self.report_info_table.item(report_numb, 6).setTextAlignment(
-                        Qt.AlignHCenter | Qt.AlignVCenter)
-                    self.report_info_table.cellWidget(
-                        report_numb, 5).setCurrentText("     退回")
+                    self.report_info_table.item(report_numb, 4).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
+                    self.report_info_table.setItem(report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
+                    self.report_info_table.item(report_numb, 6).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.report_info_table.cellWidget(report_numb, 5).setCurrentText("     退回")
             
             information = QMessageBox.information(self, '温馨提醒', '报告下载完毕！', QMessageBox.Yes, QMessageBox.Yes)
         else:
@@ -160,7 +155,7 @@ class Main(QMainWindow, Ui_MainWindow):
                     if reply == QMessageBox.No:
                         stop_audit = True
         if stop_audit == False :
-            pptx_path: str = f'../reports/temp_reports/{reports_info_list[rep_numb][6]}'
+            pptx_path: str = os.path.join(workspace_path, f'../reports/temp_reports/{reports_info_list[rep_numb][6]}')
             doc_name: str = reports_info_list[rep_numb][0]
             if os.path.exists(pptx_path):
                 content_dict : dict = audit_pptx.get_pptx_content(pptx_path)
@@ -193,14 +188,12 @@ class Main(QMainWindow, Ui_MainWindow):
             '''
             if operation_mode == 3:
                 self.report_info_table.setItem(rep_numb, 6, '通过审核')
-                self.report_info_table.item(rep_numb, 6).setForeground(
-                    QBrush(QColor(66, 184, 131)))  # 绿色
+                self.report_info_table.item(rep_numb, 6).setForeground(QBrush(QColor(66, 184, 131)))  # 绿色
                 reports_info_list[rep_numb].append(today_date)
                 reports_info_list[rep_numb].append('通过')
                 reports_info_list[rep_numb].append('--')
             elif operation_mode == 2:
-                self.report_info_table.item(rep_numb, 6).setForeground(
-                    QBrush(QColor(178, 34, 34)))  # 红色
+                self.report_info_table.item(rep_numb, 6).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
                 reports_info_list[rep_numb].append(today_date)
                 reports_info_list[rep_numb].append('退回')
                 reports_info_list[rep_numb].append(back_reason)
@@ -208,8 +201,7 @@ class Main(QMainWindow, Ui_MainWindow):
             # 构造session进行登录
             sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf8')
             data = {'user_name': 'admin', 'user_password': '123456'}
-            headers = {
-                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'}
+            headers = {'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'}
             login_url = 'http://ydszn2nd.91huayi.com/pc/Manage/login'  # 登录时表单提交地址
             session = requests.Session()
             resp = session.post(login_url, data)
@@ -259,14 +251,14 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         【功能】打开存储原始报告的文件夹
         '''
-        os.system('start explorer ' + '..\\reports\\原始报告\\')
+        os.system('start explorer ' + os.path.join(workspace_path, '..\\reports\\原始报告\\'))
 
 
     def open_passed_folder(self):
         '''
         【功能】打开存储合格报告的文件夹
         '''
-        os.system('start explorer ' + '..\\reports\\合格报告\\')
+        os.system('start explorer ' + os.path.join(workspace_path, '..\\reports\\合格报告\\'))
 
 
     def open_selected_ppt(self):
@@ -278,10 +270,9 @@ class Main(QMainWindow, Ui_MainWindow):
             if '.' in reports_info_list[dst_report_numb][6]:
                 file_name: str = reports_info_list[dst_report_numb][6]
                 if os.name == 'nt':
-                    os.startfile(f"..\\reports\\原始报告\\{file_name}")
+                    os.startfile(os.path.join(workspace_path, f'..\\reports\\原始报告\\{file_name}')
                 elif os.name == 'posix':
-                    subprocess.call(
-                        ["open", f"..\\reports\\原始报告\\{file_name}"])
+                    subprocess.call(["open", os.path.join(workspace_path, f'..\\reports\\原始报告\\{file_name}'])
             else:
                 reply = QMessageBox.warning(self, '警告', '此报告无扩展名！无法打开', QMessageBox.Yes, QMessageBox.Yes)
 
@@ -305,6 +296,6 @@ if __name__ == "__main__":
         reply = QMessageBox.warning(Main(), '警告', '登陆失败，请检查网络连接！', QMessageBox.Yes, QMessageBox.Yes)
         main.QCoreApplication.instance().quit
 
-    error_dict: dict = read_info_csv.get_error_dict("records\\error_list.csv")
+    error_dict: dict=read_info_csv.get_error_dict(os.path.join(workspace_path, "records\\error_list.csv"))
 
     sys.exit(app.exec_())

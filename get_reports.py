@@ -77,14 +77,15 @@ def download_file(file_info_list: list) -> str:
     【功能】从列表中取值，下载文件并命名
     :param file_info_list: 报告信息列表
     '''
+    workspace_path: str = os.path.dirname(os.path.realpath(__file__))
     ppt_extension_list: list = ['ppt', 'pptx']
     file_name : str = file_info_list[6]
     if '.' in file_name:
         file_extension_name: str = file_name.split('.')[1]
-        backup_path: str = f'../reports/原始报告/{file_name}'
+        backup_path: str = os.path.join(workspace_path, f'..\\reports\\原始报告\\{file_name}')
         urllib.request.urlretrieve(file_info_list[4], backup_path)
         if file_extension_name in ppt_extension_list:
-            temp_path: str = f'../reports/temp_reports/{file_name}'
+            temp_path: str = os.path.join(workspace_path, f'..\\reports\\temp_reports\\{file_name}')
             shutil.copy(backup_path, temp_path)
             urllib.request.urlretrieve(file_info_list[4], temp_path)
             download_state: str = '已下载'
