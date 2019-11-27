@@ -11,7 +11,7 @@ import urllib.request
 import shutil
 
 
-def login_get_urlcontent() -> str:
+def login_get_urlcontent(web_page_numb: int) -> str:
     '''
     【功能】模拟登陆赋能起航二期后台，获取报告页网页内容
     '''
@@ -28,8 +28,10 @@ def login_get_urlcontent() -> str:
     #可以用print(session.cookies.get_dict())查看
     resp = session.post(login_url, data)
 
-    url = 'http://ydszn2nd.91huayi.com/pc/Manage/ReportsAudit?txtUserName=&txtDoctorName=&radAuditStatus=1&txtDateBegin=&txtDateEnd=&radReportType='  # 登录后才能访问的网页
-    # 'http://ydszn2nd.91huayi.com/pc/Manage/ReportsAudit?page=2&radAuditStatus=1'
+    if web_page_numb == 1:
+        url = 'http://ydszn2nd.91huayi.com/pc/Manage/ReportsAudit?txtUserName=&txtDoctorName=&radAuditStatus=1&txtDateBegin=&txtDateEnd=&radReportType='  # 登录后才能访问的网页
+    else:
+        url = f'http://ydszn2nd.91huayi.com/pc/Manage/ReportsAudit?page={web_page_numb}&radAuditStatus=1'
     resp = session.get(url)  # 发送访问请求
     url_content: str = resp.content.decode('utf-8')
 
