@@ -141,3 +141,11 @@
 >![典型病例分享2.png](https://i.loli.net/2019/10/22/VX2TsiG5lrZ9c8C.png)
 
 
+## 程序安装使用
+### 安装python环境运行与调试程序文件
+1. 下载及安装 python 安装包: https://www.python.org/downloads/release/python-380/
+2. 安装程序运行的依赖：
+    ```shell
+    pip install -r requirements.txt
+    ```
+### 直接使用二进制 exe/dmg 文件
