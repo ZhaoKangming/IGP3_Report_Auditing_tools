@@ -4,6 +4,13 @@
 - **系统** :tv: ：Win10 LTSC 1809
 - **语言** :snake: ：python 3.7.1 64-bit
 - **其他** :rainbow: ：pipenv、pyqt5、pptx、requests、pyinstaller
+  必须要使用PyQt5.9 + python3.7，否则会产生以下错误：
+    ```
+    Traceback (most recent call last):
+    File ".\window_report_checker.py", line 3, in <module>
+        from PyQt5.QtWidgets import *
+        ImportError: DLL load failed while importing QtWidgets: 找不到指定的模块
+    ```
 ---
 
 ## 后续开发计划

@@ -2,6 +2,6 @@ requests==2.22.0
 beautifulsoup4==4.8.0
 bs4==0.0.1
 DateTime==4.3
-PyQt5==5.11.3
+PyQt5==5.9
 python-pptx==0.6.18
 urllib3==1.25.3
