@@ -14,6 +14,7 @@ import datetime
 import requests
 import io
 import webbrowser
+from pathlib import Path
 
 
 #TODO: 一个人一天内多次提交
@@ -201,7 +202,7 @@ class Main(QMainWindow, Ui_MainWindow):
                     if reply == QMessageBox.No:
                         stop_audit = True
         if stop_audit == False :
-            pptx_path: str = os.path.join(workspace_path, f'../reports/temp_reports/{reports_info_list[rep_numb][6]}')
+            pptx_path: str = os.path.join(workspace_path, Path(f'../reports/temp_reports/{reports_info_list[rep_numb][6]}'))
             doc_name: str = reports_info_list[rep_numb][0]
             if os.path.exists(pptx_path):
                 content_dict : dict = audit_pptx.get_pptx_content(pptx_path)
@@ -297,14 +298,14 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         【功能】打开存储原始报告的文件夹
         '''
-        os.system('start explorer ' + os.path.join(workspace_path, '..\\reports\\原始报告\\'))
+        os.system('start explorer ' + os.path.join(workspace_path, Path('../reports/原始报告/')))
 
 
     def open_passed_folder(self):
         '''
         【功能】打开存储合格报告的文件夹
         '''
-        os.system('start explorer ' + os.path.join(workspace_path, '..\\reports\\合格报告\\'))
+        os.system('start explorer ' + os.path.join(workspace_path, Path('../reports/合格报告/')))
 
 
     def open_selected_ppt(self):
@@ -316,9 +317,9 @@ class Main(QMainWindow, Ui_MainWindow):
             if '.' in reports_info_list[dst_report_numb][6]:
                 file_name: str = reports_info_list[dst_report_numb][6]
                 if os.name == 'nt':
-                    os.startfile(os.path.join(workspace_path, f'..\\reports\\原始报告\\{file_name}'))
+                    os.startfile(os.path.join(workspace_path, Path(f'../reports/原始报告/{file_name}')))
                 elif os.name == 'posix':
-                    subprocess.call(["open", os.path.join(workspace_path, f'..\\reports\\原始报告\\{file_name}')])
+                    subprocess.call(["open", os.path.join(workspace_path, Path(f'../reports/原始报告/{file_name}'))])
             else:
                 reply = QMessageBox.warning(self, '警告', '此报告无扩展名！无法打开', QMessageBox.Yes, QMessageBox.Yes)
 
@@ -336,6 +337,8 @@ if __name__ == "__main__":
     main = Main()
     main.show()
 
-    error_dict: dict=read_info_csv.get_error_dict(os.path.join(workspace_path, "records\\error_list.csv"))
+    error_dict: dict = read_info_csv.get_error_dict(os.path.join(workspace_path, Path("records/error_list.csv")))
 
     sys.exit(app.exec_())
+
+# 优先审核已经提交过的

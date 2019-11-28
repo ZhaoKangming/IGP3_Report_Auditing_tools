@@ -37,19 +37,19 @@ class Ui_MainWindow(object):
         self.huayi_pic_lable = QtWidgets.QLabel(self.centralwidget)
         self.huayi_pic_lable.setGeometry(QtCore.QRect(770, 600, 151, 51))
         self.huayi_pic_lable.setText("")
-        self.huayi_pic_lable.setPixmap(QtGui.QPixmap(os.path.join(workspace_path, "pics\\huayi_logo.png")))
+        self.huayi_pic_lable.setPixmap(QtGui.QPixmap(os.path.join(workspace_path, "pics/huayi_logo.png")))
         self.huayi_pic_lable.setScaledContents(True)
         self.huayi_pic_lable.setObjectName("huayi_pic_lable")
         self.igp_pic_label = QtWidgets.QLabel(self.centralwidget)
         self.igp_pic_label.setGeometry(QtCore.QRect(770, 20, 171, 51))
         self.igp_pic_label.setText("")
-        self.igp_pic_label.setPixmap(QtGui.QPixmap(os.path.join(workspace_path, "pics\\igp3_logo.png")))
+        self.igp_pic_label.setPixmap(QtGui.QPixmap(os.path.join(workspace_path, "pics/igp3_logo.png")))
         self.igp_pic_label.setScaledContents(True)
         self.igp_pic_label.setObjectName("igp_pic_label")
 
         #设置窗口图标
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(os.path.join(workspace_path, "pics\\igp3_icon.ico")),QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(os.path.join(workspace_path, "pics/igp3_icon.ico")),QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Report_Checker.setWindowIcon(icon)
 
         self.get_date_gpbx = QtWidgets.QGroupBox(self.centralwidget)

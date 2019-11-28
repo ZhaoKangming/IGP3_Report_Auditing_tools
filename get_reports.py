@@ -84,10 +84,10 @@ def download_file(file_info_list: list) -> str:
     file_name : str = file_info_list[6]
     if '.' in file_name:
         file_extension_name: str = file_name.split('.')[1]
-        backup_path: str = os.path.join(workspace_path, f'..\\reports\\原始报告\\{file_name}')
+        backup_path: str = os.path.join(workspace_path, f'../reports/原始报告/{file_name}')
         urllib.request.urlretrieve(file_info_list[4], backup_path)
         if file_extension_name in ppt_extension_list:
-            temp_path: str = os.path.join(workspace_path, f'..\\reports\\temp_reports\\{file_name}')
+            temp_path: str = os.path.join(workspace_path, f'../reports/temp_reports/{file_name}')
             shutil.copy(backup_path, temp_path)
             urllib.request.urlretrieve(file_info_list[4], temp_path)
             download_state: str = '已下载'
