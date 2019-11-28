@@ -13,6 +13,7 @@ import os
 import datetime
 import requests
 import io
+import webbrowser
 
 
 #TODO: 一个人一天内多次提交
@@ -42,6 +43,7 @@ class Main(QMainWindow, Ui_MainWindow):
         self.submit_result_btn.clicked.connect(self.submit_result)
         self.pgup_btn.clicked.connect(self.page_up)
         self.pgdn_btn.clicked.connect(self.page_down)
+        self.project_index.triggered.connect(self.open_project_index)
 
 
     def get_selected_rows(self) -> list:
@@ -168,7 +170,6 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         【功能】下载当前页所有的报告文件
         '''
-
 
 
     def download_all_report(self):
@@ -322,12 +323,18 @@ class Main(QMainWindow, Ui_MainWindow):
                 reply = QMessageBox.warning(self, '警告', '此报告无扩展名！无法打开', QMessageBox.Yes, QMessageBox.Yes)
 
 
+    def open_project_index(self):
+        '''
+        【功能】打开本项目在Github的页面
+        '''
+        webbrowser.open('https://github.com/ZhaoKangming/IGP3_Report_Auditing_tools')
+
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     main = Main()
     main.show()
-
-    
 
     error_dict: dict=read_info_csv.get_error_dict(os.path.join(workspace_path, "records\\error_list.csv"))
 
