@@ -11,7 +11,7 @@ import urllib.request
 import shutil
 
 
-def login_get_urlcontent() -> list:
+def login_get_docInfoList() -> list:
     '''
     【功能】爬虫模拟登陆赋能起航二期后台，获取报告页网页内容
     '''

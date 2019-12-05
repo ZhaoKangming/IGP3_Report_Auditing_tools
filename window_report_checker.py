@@ -20,11 +20,11 @@ from pathlib import Path
 #TODO: 一个人一天内多次提交
 #TODO: 重命名提交给诺和的功能
 #TODO: 导出审核记录
+#TODO: Server酱微信提醒明明改BUG！
 
 # 全局变量的定义及赋值
 workspace_path: str = os.path.dirname(os.path.realpath(__file__))
-content_text: str = ''
-reports_info_list: list = []
+
 
 class Main(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -48,47 +48,39 @@ class Main(QMainWindow, Ui_MainWindow):
 
 
     def get_selected_rows(self) -> list:
+        '''
+        【功能】获取当前选中行对应doc_info_list的index列表
+        '''
         selected_rows_list: list = []
+        page_numb: int = int(str(self.page_numb_label.text())[2])
         item = self.report_info_table.selectedItems()
         for i in item:
             if self.report_info_table.indexFromItem(i).row() not in selected_rows_list:
-                selected_rows_list.append(self.report_info_table.indexFromItem(i).row())
+                selected_rows_list.append(self.report_info_table.indexFromItem(i).row() + (page_numb-1)*20)
         return selected_rows_list
 
 
     def load_report_list(self):
-        global content_text
-        global reports_info_list
-        web_page_numb: int = int(str(self.page_numb_label.text())[2])
-        try:
-            content_text = get_reports.login_get_urlcontent(web_page_numb)
-        except:
-            reply = QMessageBox.warning(Main(), '警告', '登陆失败，请检查网络连接！', QMessageBox.Yes, QMessageBox.Yes)
-            main.QCoreApplication.instance().quit
-        try:
-            reports_info_list = get_reports.get_reports_info(content_text)
-            '''
-            最终的reports_info_list的内容记录
-            ['姓名','账号','报告序号','上传时间','下载地址','报告ID','文件名','审核日期','审核结果','退回理由']
-            [['陈兰英', 'Y1402583', '报告1', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028022003-3dc5.pptx', '09928004-39ee-41c5-896f-39c1aef0fe6a', '陈兰英_Y1402583_R1_191028.pptx','2019-11-03','通过','--'], 
-            ['陈兰英', 'Y1402583','报告2', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028043725-53b4.pptx', 'eaec84ae-23b6-401c-9e28-f111fb4f23ca', '陈兰英_Y1402583_R2_191028.pptx''2019-11-03','退回','报告总结部分雷同']]
-            '''
-        except AttributeError:
-            reply = QMessageBox.warning(Main(), '警告', '登陆失败，请检查是否能登录管理后台！', QMessageBox.Yes, QMessageBox.Yes)
-            main.QCoreApplication.instance().quit
-
+        page_numb: int = int(str(self.page_numb_label.text())[2])
         
         #TODO: 如果没有未审核的报告，怎么说
-        row: int = len(reports_info_list)  # 取得记录个数，用于设置表格的行数
+        # 取得记录个数，用于设置表格的行数
+        row: int = 0
+        if page_numb == max_page_numb:
+            row = len(reports_info_list) - (max_page_numb - 1)*20
+        elif page_numb < max_page_numb:
+            row = 20
         self.report_info_table.setRowCount(row)
 
         for i in range(row):
+            doc_info_index: int = i + (page_numb - 1)*20
             audit_cb = QComboBox()
-            audit_cb.addItem("     通过")  # 多余的空格是为了居中
-            audit_cb.addItem("     退回")  # 多余的空格是为了居中
+            audit_cb.addItem(" 通过")  # 多余的空格是为了居中
+            audit_cb.addItem(" 退回")  # 多余的空格是为了居中
             self.report_info_table.setCellWidget(i, 5, audit_cb)
             for j in range(4):  # 只需要显示前四项参数
-                temp_data = reports_info_list[i][j]  # 临时记录，不能直接插入表格
+                # 临时记录，不能直接插入表格
+                temp_data = reports_info_list[doc_info_index][j]
                 data = QTableWidgetItem(str(temp_data))  # 转换后可插入表格
                 self.report_info_table.setItem(i, j, data)
                 self.report_info_table.item(i, j).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
@@ -101,6 +93,7 @@ class Main(QMainWindow, Ui_MainWindow):
         reply = QMessageBox.question(self, 'Message', '确定要清空列表么?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             self.report_info_table.setRowCount(0)
+            self.page_numb_label.setText("第 1 页")
 
 
     def page_up(self):
@@ -121,9 +114,12 @@ class Main(QMainWindow, Ui_MainWindow):
         【功能】获取下一页的报告
         '''
         current_page_numb: int = int(str(self.page_numb_label.text())[2])
-        self.page_numb_label.setText("第 " + str(current_page_numb + 1) + " 页")
-        self.report_info_table.setRowCount(0)
-        Main.load_report_list(self)
+        if current_page_numb >= max_page_numb:
+            information = QMessageBox.warning(self, '警告', '当前已经是最后一页了！', QMessageBox.Yes, QMessageBox.Yes)
+        else:    
+            self.page_numb_label.setText("第 " + str(current_page_numb + 1) + " 页")
+            self.report_info_table.setRowCount(0)
+            Main.load_report_list(self)
 
 
     def download_feedback(self, dst_report_numb_list: list):
@@ -131,28 +127,27 @@ class Main(QMainWindow, Ui_MainWindow):
         【功能】尝试下载报告文件，并返回下载情况，并依据不同的下载状况返回不同颜色的下载状况到表格中
         :param  dst_report_numb_list: 报告序号列表
         '''
+        current_page_numb: int = int(str(self.page_numb_label.text())[2])
         if dst_report_numb_list:
             for report_numb in dst_report_numb_list:
+                table_index_numb: int = report_numb - 20*(current_page_numb - 1)
                 download_state: str = get_reports.download_file(reports_info_list[report_numb])
-                self.report_info_table.setItem(
-                    report_numb, 4, QTableWidgetItem(download_state))
-                self.report_info_table.item(report_numb, 4).setTextAlignment(
-                    Qt.AlignHCenter | Qt.AlignVCenter)
+                self.report_info_table.setItem(table_index_numb, 4, QTableWidgetItem(download_state))
+                self.report_info_table.item(table_index_numb, 4).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                 if download_state == '已下载':
-                    self.report_info_table.item(report_numb, 4).setForeground(
-                        QBrush(QColor(66, 184, 131)))  # 绿色
+                    self.report_info_table.item(table_index_numb, 4).setForeground(QBrush(QColor(66, 184, 131)))  # 绿色
                 elif download_state == '无后缀名':
                     errorcode: str = 'A2'
-                    self.report_info_table.item(report_numb, 4).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
-                    self.report_info_table.setItem(report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
-                    self.report_info_table.item(report_numb, 6).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-                    self.report_info_table.cellWidget(report_numb, 5).setValue("     退回")
+                    self.report_info_table.item(table_index_numb, 4).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
+                    self.report_info_table.setItem(table_index_numb, 6, QTableWidgetItem(error_dict[errorcode]))
+                    self.report_info_table.item(table_index_numb, 6).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.report_info_table.cellWidget(table_index_numb, 5).setValue(" 退回")
                 elif download_state == '非PPT文件':
                     errorcode: str = 'A1'
-                    self.report_info_table.item(report_numb, 4).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
-                    self.report_info_table.setItem(report_numb, 6, QTableWidgetItem(error_dict[errorcode]))
-                    self.report_info_table.item(report_numb, 6).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-                    self.report_info_table.cellWidget(report_numb, 5).setCurrentText("     退回")
+                    self.report_info_table.item(table_index_numb, 4).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
+                    self.report_info_table.setItem(table_index_numb, 6, QTableWidgetItem(error_dict[errorcode]))
+                    self.report_info_table.item(table_index_numb, 6).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                    self.report_info_table.cellWidget(table_index_numb, 5).setCurrentText(" 退回")
             
             information = QMessageBox.information(self, '温馨提醒', '报告下载完毕！', QMessageBox.Yes, QMessageBox.Yes)
         else:
@@ -171,14 +166,21 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         【功能】下载当前页所有的报告文件
         '''
+        current_page_numb: int = int(str(self.page_numb_label.text())[2])
+        if current_page_numb == max_page_numb:
+            page_report_numb_list: list  = list(range((current_page_numb-1)*20, len(reports_info_list)))
+        else:
+            page_report_numb_list: list = list(range((current_page_numb-1)*20, current_page_numb*20))
+        Main.download_feedback(self, page_report_numb_list)
 
 
     def download_all_report(self):
         '''
         【功能】下载全部报告文件
         '''
-        dst_report_numb_list: list = list(range(len(reports_info_list)))
-        Main.download_feedback(self, dst_report_numb_list)
+        # dst_report_numb_list: list = list(range(len(reports_info_list)))
+        # Main.download_feedback(self, dst_report_numb_list)
+        information = QMessageBox.warning(self, '提醒', '此功能正在调试中\n\n为了能知悉下载状态，请逐页下载！', QMessageBox.Yes, QMessageBox.Yes)
 
 
     def audit_report(self):
@@ -187,6 +189,7 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         # 检查当前是否有报告选中，以及选择报告的数量
         stop_audit : bool = False
+        current_page_numb: int = int(str(self.page_numb_label.text())[2])
         dst_report_numb_list: list = Main.get_selected_rows(self)
         if len(dst_report_numb_list) == 0 :
             reply = QMessageBox.warning(self, '警告', '未选择待审核报告的行！', QMessageBox.Yes, QMessageBox.Yes)
@@ -196,8 +199,9 @@ class Main(QMainWindow, Ui_MainWindow):
             stop_audit = True
         elif len(dst_report_numb_list) == 1:
             rep_numb: int = dst_report_numb_list[0]
-            if self.report_info_table.item(rep_numb, 6):
-                if self.report_info_table.item(rep_numb, 6).text().replace(' ', ''):
+            table_rep_numb: int = dst_report_numb_list[0] - (current_page_numb)*20
+            if self.report_info_table.item(table_rep_numb, 6):
+                if self.report_info_table.item(table_rep_numb, 6).text().replace(' ', ''):
                     reply = QMessageBox.question(self, 'Message', '选中的报告的 审核状况/不合格原因 单元格已有内容，确定要重新审核?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                     if reply == QMessageBox.No:
                         stop_audit = True
@@ -217,14 +221,13 @@ class Main(QMainWindow, Ui_MainWindow):
                 reply = QMessageBox.warning(self, '警告', '临时报告文件夹中无此文件！请核对！', QMessageBox.Yes, QMessageBox.Yes)
 
 
-
-
     def submit_result(self):
         '''
         【功能】提交报告审核结果
         '''
         submit_report_numb_list: list = Main.get_selected_rows(self)
         today_date: str = str(datetime.date.today().strftime("%Y-%m-%d"))
+        current_page_numb: int = int(str(self.page_numb_label.text())[2])
 
         def post_report_result(rep_numb: int, operation_mode: int, back_reason: str):
             '''
@@ -233,14 +236,15 @@ class Main(QMainWindow, Ui_MainWindow):
             :param operation_mode: 操作模式，2代表退回，3代表通过
             :param back_reason: 退回原因，通过的话，back_reason = ''
             '''
+            table_rep_numb = rep_numb - 20*(current_page_numb - 1)
             if operation_mode == 3:
-                self.report_info_table.setItem(rep_numb, 6, '通过审核')
-                self.report_info_table.item(rep_numb, 6).setForeground(QBrush(QColor(66, 184, 131)))  # 绿色
+                self.report_info_table.setItem(table_rep_numb, 6, '通过审核')
+                self.report_info_table.item(table_rep_numb, 6).setForeground(QBrush(QColor(66, 184, 131)))  # 绿色
                 reports_info_list[rep_numb].append(today_date)
                 reports_info_list[rep_numb].append('通过')
                 reports_info_list[rep_numb].append('--')
             elif operation_mode == 2:
-                self.report_info_table.item(rep_numb, 6).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
+                self.report_info_table.item(table_rep_numb, 6).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
                 reports_info_list[rep_numb].append(today_date)
                 reports_info_list[rep_numb].append('退回')
                 reports_info_list[rep_numb].append(back_reason)
@@ -266,32 +270,33 @@ class Main(QMainWindow, Ui_MainWindow):
             reply = QMessageBox.warning(self, '警告', '未选择待提交审核结果的行', QMessageBox.Yes, QMessageBox.Yes)
         else:
             for submit_report_numb in submit_report_numb_list:
-                audit_result: str = self.report_info_table.cellWidget(submit_report_numb, 5).currentText().replace(' ', '')
+                table_submit_report_numb: int = submit_report_numb - 20*(current_page_numb - 1)
+                audit_result: str = self.report_info_table.cellWidget(table_submit_report_numb, 5).currentText().replace(' ', '')
                 if audit_result == '通过':
-                    if self.report_info_table.item(submit_report_numb, 6):
-                        back_reason: str = self.report_info_table.item(
-                            submit_report_numb, 6).text().replace(' ', '')
+                    if self.report_info_table.item(table_submit_report_numb, 6):
+                        back_reason: str = self.report_info_table.item(table_submit_report_numb, 6).text().replace(' ', '')
                         if len(back_reason) == 0:
                             post_report_result(submit_report_numb, 3, '')
                         else:
-                            self.report_info_table.item(submit_report_numb, 6).setForeground(QBrush(QColor(6, 82, 121)))  # 靛蓝
-                            reply = QMessageBox.warning(self, '警告', f'第{submit_report_numb + 1}行，审核结果设为-通过，却有不合格原因！', QMessageBox.Yes, QMessageBox.Yes)
+                            self.report_info_table.item(table_submit_report_numb, 6).setForeground(QBrush(QColor(6, 82, 121)))  # 靛蓝
+                            reply = QMessageBox.warning(
+                                self, '警告', f'第{table_submit_report_numb + 1}行，审核结果设为-通过，却有不合格原因！', QMessageBox.Yes, QMessageBox.Yes)
                     else:
                         post_report_result(submit_report_numb, 3, '')
                 elif audit_result == '退回':
-                    if self.report_info_table.item(submit_report_numb, 6):
-                        back_reason: str = self.report_info_table.item(submit_report_numb, 6).text().replace(' ', '')
+                    if self.report_info_table.item(table_submit_report_numb, 6):
+                        back_reason: str = self.report_info_table.item(table_submit_report_numb, 6).text().replace(' ', '')
                         if len(back_reason) == 0:
-                            self.report_info_table.setItem(submit_report_numb, 6, '缺少不合格原因')
-                            self.report_info_table.item(submit_report_numb, 6).setForeground(QBrush(QColor(6, 82, 121)))  # 靛蓝
-                            reply = QMessageBox.warning(self, '警告', f'第{submit_report_numb + 1}行，审核结果设为-退回，却无不合格原因！', QMessageBox.Yes, QMessageBox.Yes)
+                            self.report_info_table.setItem(table_submit_report_numb, 6, '缺少不合格原因')
+                            self.report_info_table.item(table_submit_report_numb, 6).setForeground(QBrush(QColor(6, 82, 121)))  # 靛蓝
+                            reply = QMessageBox.warning(self, '警告', f'第{table_submit_report_numb + 1}行，审核结果设为-退回，却无不合格原因！', QMessageBox.Yes, QMessageBox.Yes)
                         else:
-                            post_report_result(
-                                submit_report_numb, 2, back_reason)
+                            post_report_result(submit_report_numb, 2, back_reason)
                     else:
-                        self.report_info_table.setItem(submit_report_numb, 6, '缺少不合格原因')
-                        self.report_info_table.item(submit_report_numb, 6).setForeground(QBrush(QColor(6, 82, 121)))  # 靛蓝
-                        reply = QMessageBox.warning(self, '警告', f'第{submit_report_numb + 1}行，审核结果设为-退回，却无不合格原因！', QMessageBox.Yes, QMessageBox.Yes)
+                        self.report_info_table.setItem(table_submit_report_numb, 6, '缺少不合格原因')
+                        self.report_info_table.item(table_submit_report_numb, 6).setForeground(QBrush(QColor(6, 82, 121)))  # 靛蓝
+                        reply = QMessageBox.warning(
+                            self, '警告', f'第{table_submit_report_numb + 1}行，审核结果设为-退回，却无不合格原因！', QMessageBox.Yes, QMessageBox.Yes)
 
 
     def open_original_folder(self):
@@ -336,6 +341,20 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     main = Main()
     main.show()
+    try:
+        crawler_result: list = get_reports.login_get_docInfoList()
+        reports_info_list: list = crawler_result[1]
+        max_page_numb: int = crawler_result[0]
+        '''
+        最终的reports_info_list的内容记录
+        ['姓名','账号','报告序号','上传时间','下载地址','报告ID','文件名','审核日期','审核结果','退回理由']
+        [['陈兰英', 'Y1402583', '报告1', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028022003-3dc5.pptx', '09928004-39ee-41c5-896f-39c1aef0fe6a', '陈兰英_Y1402583_R1_191028.pptx','2019-11-03','通过','--'],
+        ['陈兰英', 'Y1402583','报告2', '2019-10-28', 'http://ydszn2nd.91huayi.com/Annex/Reports/20191028043725-53b4.pptx', 'eaec84ae-23b6-401c-9e28-f111fb4f23ca', '陈兰英_Y1402583_R2_191028.pptx''2019-11-03','退回','报告总结部分雷同']]
+        '''
+    except AttributeError:
+        reply = QMessageBox.warning(Main(), '警告', '登陆失败，请检查是否能登录管理后台！', QMessageBox.Yes, QMessageBox.Yes)
+        main.QCoreApplication.instance().quit
+
 
     error_dict: dict = read_info_csv.get_error_dict(os.path.join(workspace_path, Path("records/error_list.csv")))
 
