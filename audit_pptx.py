@@ -28,7 +28,7 @@ def get_pptx_content(pptx_path: str) -> dict:
     prs = Presentation(pptx_path)
     backup_content_dict: dict = {}
     content_dict: dict = {}
-    i = 0
+    i: int = 0
 
     for slide in prs.slides:
         text: str = ''
