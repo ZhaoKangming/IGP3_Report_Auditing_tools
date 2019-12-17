@@ -20,6 +20,7 @@ def ppt_to_pptx():
     【功能】删除隐藏文件、转化ppt为pptx
     '''
     app = win32.gencache.EnsureDispatch('PowerPoint.Application')
+    have_ppt: bool = False
 
     for file in os.listdir(passed_report_folder):
         file_path: str = os.path.join(passed_report_folder, file)
@@ -27,9 +28,10 @@ def ppt_to_pptx():
             os.remove(file_path)
         else:
             if os.path.splitext(file)[1] == '.ppt':
-                print(f'正在转换文件 -- {file} --')
+                have_ppt = True
+                print(f'正在转换文件 —— 《{file}》')
                 new_pptx_path: str = file_path + 'x'
-                backup_ppt_path: str = os.path.join(script_path, '合格ppt格式备份', file)
+                backup_ppt_path: str = os.path.join(script_path, '..', 'reports', '合格ppt格式备份', file)
                 shutil.copyfile(file_path, backup_ppt_path)   # 备份一下合格ppt报告
                 office_obj = app.Presentations.Open(file_path, WithWindow=False)
                 office_obj.SaveAs(new_pptx_path)
@@ -37,7 +39,8 @@ def ppt_to_pptx():
                 os.remove(file_path)
 
     app.Quit()
-    print('转换文件格式完成！')
+    if have_ppt == True:
+        print('转换文件格式完成！')
 
 
 def load_summary_data():
@@ -52,8 +55,6 @@ def load_summary_data():
             if row != '':
                 summary_dict[row.split(',')[0]] = row.split(',')[1]
         summary_dict.pop('报告文件名')
-    
-    print(summary_dict)
 
 
 def update_summary_data():
@@ -61,7 +62,7 @@ def update_summary_data():
     【功能】更新报告的总结数据
     '''
     global summary_dict
-    with open(summary_csv_path, 'a+', encoding='utf-8-sig') as csv_file:
+    with open(summary_csv_path, 'a+', encoding='utf-8-sig', newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
         for report_file in os.listdir(passed_report_folder):
             if report_file[0] != '.' and os.path.splitext(report_file)[1] == '.pptx':
@@ -119,8 +120,8 @@ def get_content_summary(content_dict: dict) -> list:
     sentence_list: list = []
     character_numb: int = 0
 
-    for i in range(1, len(content_dict)+1):
-        if '胰岛素规范实践的获益' in content_dict[i]:
+    for i in range(5, len(content_dict)+1):     # 因为目录肯定出现在前五页，而获益与展望不会出现在前五页
+        if '胰岛素规范实践的获益' in content_dict[i]:   # 因为有的医生会把获益与展望放到两页来写
             have_summary = True
             start_page_numb: int = i
             for j in range(i+1, i +4):
@@ -151,23 +152,25 @@ def get_content_summary(content_dict: dict) -> list:
 
         character_numb = len(summary_text)  # 计算字数
 
-        del_point_sentence_list: list = ['口服药联用情况',
+        del_point_sentence_list: list = ['胰岛素起始时机',
+                                        '口服药联用情况',
                                         '2型糖尿病病程',
                                         '并发症/合并症',
                                         '其他',
+                                        '规范定期随访',
                                         '规律随访患者获益',
                                         '常见患者脱落原因',
                                         '糖化水平',
                                         '提升治疗依从性的经验']
-        for del_sentence in del_sentence_list:
-            summary_text = summary_text.replace(del_sentence, '')
+        for del_point_sentence in del_point_sentence_list:
+            summary_text = summary_text.replace(del_point_sentence, '')
 
         # 清除数字、英文字符、特殊标点
         pattern_1: str = '[a-zA-Z0-9#$%&()*+-/<=>@★、…【】[\\]^_`{|}~]+'
         summary_text = re.sub(pattern_1, '', summary_text)
 
         # 将语句拆分
-        pattern_2 = r',|\.|/|;|\'|`|\[|\]|<|>|\?|:|"|\{|\}|\~|!|\(|\)|-|=|\_|\+|，|。|、|；|“|”|‘|’|·|！| |…|（|）'
+        pattern_2 = r',|\.|/|;|\'|`|\[|\]|<|>|\?|:|：|"|\{|\}|\~|!|\(|\)|-|=|\_|\+|，|。|、|；|“|”|‘|’|·|！| |…|（|）'
         sentence_list = [i for i in re.split(pattern_2, summary_text) if i != '']       # 清除列表中的空值
 
     return [have_summary, sentence_list, character_numb]
@@ -190,3 +193,5 @@ def initialized_database():
 
 
 #TODO:首先核对该医生的报告名称是否已经在字典中
+
+initialized_database()
