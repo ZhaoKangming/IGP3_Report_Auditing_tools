@@ -1,3 +1,6 @@
+# -*- coding:utf-8 -*-
+
+import csv
 import os
 import shutil
 import win32com.client as win32
@@ -49,6 +52,8 @@ def load_summary_data():
             if row != '':
                 summary_dict[row.split(',')[0]] = row.split(',')[1]
         summary_dict.pop('报告文件名')
+    
+    print(summary_dict)
 
 
 def update_summary_data():
@@ -56,12 +61,22 @@ def update_summary_data():
     【功能】更新报告的总结数据
     '''
     global summary_dict
-    with open(summary_csv_path, 'a+', encoding='utf-8-sig') as csv_writer:
-        for file in os.listdir(passed_report_folder):
-            if file[0] != '.' and os.path.splitext(file)[1] == '.pptx':
-                if not file in summary_dict.keys():
-                    summary_content: dict = get_pptx_content(os.path.join(passed_report_folder, file))
-
+    with open(summary_csv_path, 'a+', encoding='utf-8-sig') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        for report_file in os.listdir(passed_report_folder):
+            if report_file[0] != '.' and os.path.splitext(report_file)[1] == '.pptx':
+                filename: str = os.path.splitext(report_file)[0]
+                if not filename in summary_dict.keys():
+                    content_dict: dict = get_pptx_content(os.path.join(passed_report_folder, report_file))
+                    summary_result: list = get_content_summary(content_dict)
+                    if summary_result[0] == True:
+                        if summary_result[2] >= 190:  # 含标点字数大于等于190
+                            summary_dict[filename] = summary_result[1]
+                            csv_writer.writerow([filename, summary_result[1],summary_result[2]])
+                        else:
+                            print(f'[ERROR] --> 总结字数不足，含标点 {summary_result[2]} 字 ——《{report_file}》')
+                    else:
+                        print(f'[ERROR] --> 未找到获益与展望部分 ——《{report_file}》')
 
 
 def get_pptx_content(pptx_path: str) -> dict:
@@ -102,9 +117,10 @@ def get_content_summary(content_dict: dict) -> list:
     end_page_numb: int = 0          # 总结与展望结束的页码
     summary_text: str = ''          # 总结与展望的文本
     sentence_list: list = []
+    character_numb: int = 0
 
     for i in range(1, len(content_dict)+1):
-        if '胰岛素规范实践的获益与展望' in content_dict[i]:
+        if '胰岛素规范实践的获益' in content_dict[i]:
             have_summary = True
             start_page_numb: int = i
             for j in range(i+1, i +4):
@@ -117,13 +133,44 @@ def get_content_summary(content_dict: dict) -> list:
     if have_summary == True:
         if have_typical_case == False:
             end_page_numb: int = start_page_numb    # 如果在 “总结页” 后面的三页内都没有 “典型病例分享”，我们就默认总结只有一页
-
         # 合并总结部分的文本
         for i in range(start_page_numb, end_page_numb+1):
             summary_text += content_dict[i]
 
-        
+        # 清除提示性文本
+        del_sentence_list: list = ['胰岛素规范实践的获益与展望',
+                                    '胰岛素规范实践的获益',
+                                    '胰岛素规范实践的展望',
+                                    '请回顾本组患者依从性数据',
+                                    '探讨规律随访的获益',
+                                    '可从以下几个方面总结',
+                                    '请回顾本组患者起始胰岛素治疗的特点',
+                                    '探讨规范起始胰岛素的临床获益']
+        for del_sentence in del_sentence_list:
+            summary_text = summary_text.replace(del_sentence, '')
 
+        character_numb = len(summary_text)  # 计算字数
+
+        del_point_sentence_list: list = ['口服药联用情况',
+                                        '2型糖尿病病程',
+                                        '并发症/合并症',
+                                        '其他',
+                                        '规律随访患者获益',
+                                        '常见患者脱落原因',
+                                        '糖化水平',
+                                        '提升治疗依从性的经验']
+        for del_sentence in del_sentence_list:
+            summary_text = summary_text.replace(del_sentence, '')
+
+        # 清除数字、英文字符、特殊标点
+        pattern_1: str = '[a-zA-Z0-9#$%&()*+-/<=>@★、…【】[\\]^_`{|}~]+'
+        summary_text = re.sub(pattern_1, '', summary_text)
+
+        # 将语句拆分
+        pattern_2 = r',|\.|/|;|\'|`|\[|\]|<|>|\?|:|"|\{|\}|\~|!|\(|\)|-|=|\_|\+|，|。|、|；|“|”|‘|’|·|！| |…|（|）'
+        sentence_list = [i for i in re.split(pattern_2, summary_text) if i != '']       # 清除列表中的空值
+
+    return [have_summary, sentence_list, character_numb]
 
 
 def compute_similarity():
@@ -131,5 +178,15 @@ def compute_similarity():
     【功能】计算总结部分的相似度
     '''
     pass
+
+
+def initialized_database():
+    '''
+    【功能】初始化获益与展望数据库
+    '''
+    ppt_to_pptx()
+    load_summary_data()
+    update_summary_data()
+
 
 #TODO:首先核对该医生的报告名称是否已经在字典中
