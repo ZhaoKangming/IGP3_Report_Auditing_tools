@@ -52,7 +52,7 @@ class Main(QMainWindow, Ui_MainWindow):
         【功能】获取当前选中行对应doc_info_list的index列表
         '''
         selected_rows_list: list = []
-        page_numb: int = int(str(self.page_numb_label.text())[2])
+        page_numb: int = int(str(self.page_numb_label.text()).replace(' ','').replace('第','').replace('页',''))
         item = self.report_info_table.selectedItems()
         for i in item:
             if self.report_info_table.indexFromItem(i).row() not in selected_rows_list:
@@ -61,7 +61,7 @@ class Main(QMainWindow, Ui_MainWindow):
 
 
     def load_report_list(self):
-        page_numb: int = int(str(self.page_numb_label.text())[2])
+        page_numb: int = int(str(self.page_numb_label.text()).replace(' ','').replace('第','').replace('页',''))
         
         #TODO: 如果没有未审核的报告，怎么说
         # 取得记录个数，用于设置表格的行数
@@ -100,7 +100,7 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         【功能】获取上一页的报告
         '''
-        current_page_numb: int = int(str(self.page_numb_label.text())[2])
+        current_page_numb: int = int(str(self.page_numb_label.text()).replace(' ','').replace('第','').replace('页',''))
         if current_page_numb == 1:
             information = QMessageBox.warning(self, '警告', '当前已经是第一页了！', QMessageBox.Yes, QMessageBox.Yes)
         else:
@@ -113,7 +113,7 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         【功能】获取下一页的报告
         '''
-        current_page_numb: int = int(str(self.page_numb_label.text())[2])
+        current_page_numb: int = int(str(self.page_numb_label.text()).replace(' ','').replace('第','').replace('页',''))
         if current_page_numb >= max_page_numb:
             information = QMessageBox.warning(self, '警告', '当前已经是最后一页了！', QMessageBox.Yes, QMessageBox.Yes)
         else:    
@@ -127,7 +127,7 @@ class Main(QMainWindow, Ui_MainWindow):
         【功能】尝试下载报告文件，并返回下载情况，并依据不同的下载状况返回不同颜色的下载状况到表格中
         :param  dst_report_numb_list: 报告序号列表
         '''
-        current_page_numb: int = int(str(self.page_numb_label.text())[2])
+        current_page_numb: int = int(str(self.page_numb_label.text()).replace(' ','').replace('第','').replace('页',''))
         if dst_report_numb_list:
             for report_numb in dst_report_numb_list:
                 table_index_numb: int = report_numb - 20*(current_page_numb - 1)
@@ -166,7 +166,7 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         【功能】下载当前页所有的报告文件
         '''
-        current_page_numb: int = int(str(self.page_numb_label.text())[2])
+        current_page_numb: int = int(str(self.page_numb_label.text()).replace(' ','').replace('第','').replace('页',''))
         if current_page_numb == max_page_numb:
             page_report_numb_list: list  = list(range((current_page_numb-1)*20, len(reports_info_list)))
         else:
@@ -189,7 +189,7 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         # 检查当前是否有报告选中，以及选择报告的数量
         stop_audit : bool = False
-        current_page_numb: int = int(str(self.page_numb_label.text())[2])
+        current_page_numb: int = int(str(self.page_numb_label.text()).replace(' ','').replace('第','').replace('页',''))
         dst_report_numb_list: list = Main.get_selected_rows(self)
         if len(dst_report_numb_list) == 0 :
             reply = QMessageBox.warning(self, '警告', '未选择待审核报告的行！', QMessageBox.Yes, QMessageBox.Yes)
@@ -227,7 +227,7 @@ class Main(QMainWindow, Ui_MainWindow):
         '''
         submit_report_numb_list: list = Main.get_selected_rows(self)
         today_date: str = str(datetime.date.today().strftime("%Y-%m-%d"))
-        current_page_numb: int = int(str(self.page_numb_label.text())[2])
+        current_page_numb: int = int(str(self.page_numb_label.text()).replace(' ','').replace('第','').replace('页',''))
 
         def post_report_result(rep_numb: int, operation_mode: int, back_reason: str):
             '''
