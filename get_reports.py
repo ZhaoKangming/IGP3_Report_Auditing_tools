@@ -20,8 +20,7 @@ def login_get_docInfoList() -> list:
 
     #登录时需要POST的数据
     data = {'user_name': 'admin', 'user_password': '123456'}
-    headers = {
-        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'}
+    headers = {'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'}
     login_url = 'http://ydszn2nd.91huayi.com/pc/Manage/login'  # 登录时表单提交到的地址
     session = requests.Session()  # 构造Session
     #在session中发送登录请求，此后这个session里就存储了cookie
@@ -37,8 +36,12 @@ def login_get_docInfoList() -> list:
     page_numb_list: list = []
     for li in li_text_list:
         a = li.a.string
-        if not a == '»':
+        if a != '»' and a != '…':
             page_numb_list.append(int(a))
+        if a == '»»':
+            pn = li.a['href'].replace('/pc/Manage/ReportsAudit?page=','').replace('&radAuditStatus=1','')
+            page_numb_list.append(int(pn))
+
     max_page_numb: int = max(page_numb_list)
     reports_info_list: list = get_reports_info(page1_url_content)
 
