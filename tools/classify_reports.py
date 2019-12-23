@@ -1,6 +1,10 @@
 # -- coding:utf-8 --
-# author:ZhaoKangming
-# 功能：爬虫之模拟登录赋能启航第二期后台
+
+'''
+author: ZhaoKangming
+version: 0.4
+功能：爬虫赋能启航第二期后台未审核报告信息
+'''
 
 import requests
 import sys
@@ -9,6 +13,7 @@ from bs4 import BeautifulSoup
 import os
 import urllib.request
 import shutil
+import lxml
 
 script_path: str = os.path.dirname(os.path.realpath(__file__))
 
@@ -39,11 +44,11 @@ def login_get_docInfoList() -> list:
     page_numb_list: list = []
     for li in li_text_list:
         a = li.a.string
-        if a != '»' and a != '':
-            page_numb_list.append(int(a))
         if a == '»»':
             pn = li.a['href'].replace('/pc/Manage/ReportsAudit?page=','').replace('&radAuditStatus=1','')
             page_numb_list.append(int(pn))
+        elif not a in ['»', '…', '']:
+            page_numb_list.append(int(a))
     max_page_numb: int = max(page_numb_list)
     reports_info_list: list = get_reports_info(page1_url_content)
 
@@ -104,7 +109,6 @@ def get_resubmit_reports() -> list:
     for i in reports_info_list:
         if i[5]:
             resubmit_list.append(i[7])
-            print(f'  [RESUBMIT] ---> {i[7]}')
     return resubmit_list
 
 
@@ -115,10 +119,11 @@ def classify_reports():
         os.makedirs(resubmit_folder)
     for rp in os.listdir(script_path):
         if rp in resubmit_list:
+            print(f'  [RESUBMIT] ---> {rp}')
             src_file: str = os.path.join(script_path, rp)
             dst_file: str = os.path.join(resubmit_folder, rp)
             shutil.move(src_file,dst_file)
-    print('\n' + '— — '*60 + '\n 处理完毕！')
+    print('\n' + '— — '*20 + '\n 处理完毕！')
     
 
 classify_reports()
