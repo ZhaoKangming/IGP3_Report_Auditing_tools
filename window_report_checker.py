@@ -141,7 +141,7 @@ class Main(QMainWindow, Ui_MainWindow):
                     self.report_info_table.item(table_index_numb, 4).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
                     self.report_info_table.setItem(table_index_numb, 6, QTableWidgetItem(error_dict[errorcode]))
                     self.report_info_table.item(table_index_numb, 6).setTextAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-                    self.report_info_table.cellWidget(table_index_numb, 5).setValue(" 退回")
+                    self.report_info_table.cellWidget(table_index_numb, 5).setCurrentText(" 退回")
                 elif download_state == '非PPT文件':
                     errorcode: str = 'A1'
                     self.report_info_table.item(table_index_numb, 4).setForeground(QBrush(QColor(178, 34, 34)))  # 红色
