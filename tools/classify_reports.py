@@ -108,7 +108,8 @@ def get_resubmit_reports() -> list:
     # print(reports_info_list)
     for i in reports_info_list:
         if i[5]:
-            resubmit_list.append(i[7])
+            if '.' in i[7]:
+                resubmit_list.append(i[7].split('.')[0])
     return resubmit_list
 
 
@@ -117,14 +118,15 @@ def classify_reports():
     resubmit_folder: str = os.path.join(script_path,'再次提交')
     if not os.path.exists(resubmit_folder):
         os.makedirs(resubmit_folder)
-    for rp in os.listdir(script_path):
+    for report_file in os.listdir(script_path):
+        rp: str = os.path.splitext(report_file)[0]
         if rp in resubmit_list:
             print(f'  [RESUBMIT] ---> {rp}')
             src_file: str = os.path.join(script_path, rp)
             dst_file: str = os.path.join(resubmit_folder, rp)
             shutil.move(src_file,dst_file)
     print('\n' + '— — '*20 + '\n 处理完毕！')
-    
+
 
 classify_reports()
 f = input('按任意按键退出！')
