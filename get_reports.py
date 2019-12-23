@@ -36,11 +36,11 @@ def login_get_docInfoList() -> list:
     page_numb_list: list = []
     for li in li_text_list:
         a = li.a.string
-        if a != '»' and a != '…':
-            page_numb_list.append(int(a))
         if a == '»»':
             pn = li.a['href'].replace('/pc/Manage/ReportsAudit?page=','').replace('&radAuditStatus=1','')
             page_numb_list.append(int(pn))
+        elif a != '»' and a != '…':
+            page_numb_list.append(int(a))
 
     max_page_numb: int = max(page_numb_list)
     reports_info_list: list = get_reports_info(page1_url_content)
