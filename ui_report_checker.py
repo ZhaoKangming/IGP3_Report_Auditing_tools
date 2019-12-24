@@ -205,7 +205,7 @@ class Ui_MainWindow(object):
         self.submit_result_btn.setText(_translate("Report_Checker", "提交审核结果"))
         self.help_menu.setTitle(_translate("Report_Checker", "使用说明"))
         self.about_software_menu.setTitle(_translate("Report_Checker", "关于软件"))
-        self.version_action.setText(_translate("Report_Checker", "版本：v 0.1"))
+        self.version_action.setText(_translate("Report_Checker", "版本：v 0.4"))
         self.check_update_action.setText(_translate("Report_Checker", "检查更新"))
         self.project_index.setText(_translate("Report_Checker", "项目主页"))
         self.developer_action.setText(_translate("Report_Checker", "开发者：赵康明"))
