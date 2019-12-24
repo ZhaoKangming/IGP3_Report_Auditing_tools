@@ -7,7 +7,7 @@ def generate_audit_xlsx(worker_name: str):
     worker_xlsx_path: str = f'z:\\{worker_name}\\报告审核记录表-{worker_name}-{today_date}.xlsx'
     shutil.copyfile(template_path, worker_xlsx_path)
     record_wb = load_workbook(worker_xlsx_path)
-    record_sht = record_wb['Sheet1']
+    record_sht = record_wb['审核记录']
     report_info_list: list = []
 
     for file_name in os.listdir(f'z:\\{worker_name}'):
@@ -21,8 +21,12 @@ def generate_audit_xlsx(worker_name: str):
     for i in range(2, 2 + len(report_info_list)):
         for j in range(2, 6):
             record_sht.cell(i, j).value = report_info_list[i-2][j-2]
-        record_sht.cell(i, 7).value = today_date_2
-        record_sht.cell(i, 10).value = worker_name
+        record_sht.cell(i, 6).value = 1                 # 写入提交次数
+        record_sht.cell(i, 7).value = today_date_2      # 写入审核日期
+        record_sht.cell(i, 10).value = worker_name      # 写入审核人
+    
+    # 删除多余的行
+    record_sht.delete_rows(2 + len(report_info_list), 49 - len(report_info_list))
 
     record_wb.save(worker_xlsx_path)
     del record_wb
