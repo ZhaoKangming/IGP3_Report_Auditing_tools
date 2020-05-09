@@ -19,7 +19,7 @@ def login_get_docInfoList() -> list:
         sys.stdout.buffer, encoding='utf8')  # 改变标准输出的默认编码
 
     #登录时需要POST的数据
-    data = {'user_name': 'admin', 'user_password': '123456'}
+    data = {'user_name': '', 'user_password': ''}    # 输入账号密码
     headers = {'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'}
     login_url = 'http://ydszn2nd.91huayi.com/pc/Manage/login'  # 登录时表单提交到的地址
     session = requests.Session()  # 构造Session
